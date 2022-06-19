@@ -1,6 +1,6 @@
-FROM python:3.10.2-slim-bullseye
-RUN pip install signalrcore
-RUN pip install tabulate
-WORKDIR /app
+FROM python:3.10.4
+
+WORKDIR /app/
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 COPY . .
-ENTRYPOINT [ "python", "run.py" ]

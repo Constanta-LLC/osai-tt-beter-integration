@@ -1,0 +1,7 @@
+version: '3.7'
+
+services:
+  beter-integration:
+    build:
+      context: .
+    command: ["python", "run.py"]

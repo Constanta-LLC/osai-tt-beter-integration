@@ -1,30 +1,48 @@
+from loguru import logger
+
+
 class ScoreUpdater:
-    def __init__(self):
+    def __init__(self, coach_cli):
+        self.coach_cli = coach_cli
         self.old_score = dict()
 
     def on_upd(self, data):
         try:
             if len(data[0]) > 1:
-                print("Ignore snapshot because it's not event", data)
+                logger.info("Ignore snapshot because it's not event")
                 return
             if len(data[0]) == 0:
-                print("Ignore empty because it's not event", data)
+                logger.info("Ignore empty because it's not event")
                 return
-            event = data[0][0]
-            new_score = dict()
-            for param in event["params"]:
-                if param["key"] == "4":
-                    # points
-                    first, second = param["value"].split(":")  # need inverse?
-                    new_score["points"] = {"first": first, "second": second}
-                elif param["key"] == "5":
-                    # sets
-                    first, second = param["value"].split(":")  # need inverse?
-                    new_score["sets"] = {"first": first, "second": second}
+
+            new_score = self.parse_score(data)
 
             if new_score != self.old_score:
-                print("New score", new_score)
+                logger.info(f"New score {new_score}")
+                self.coach_cli.send_point(new_score)
                 self.old_score = new_score
 
         except Exception as e:
-            print(e, data)
+            logger.exception(f"Unexpected error {e} on data {data}")
+
+    @staticmethod
+    def parse_score(data):
+        event = data[0][0]
+        new_score = dict()
+        for param in event["params"]:
+            if param["key"] == "4":
+                # points
+                new_score["player1_points"], new_score["player2_points"] = param[
+                    "value"
+                ].split(
+                    ":"
+                )  # need inverse?
+
+            elif param["key"] == "5":
+                # sets
+                new_score["player1_sets"], new_score["player2_sets"] = param[
+                    "value"
+                ].split(
+                    ":"
+                )  # need inverse?
+        return new_score

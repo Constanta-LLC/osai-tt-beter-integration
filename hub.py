@@ -1,5 +1,5 @@
+from loguru import logger
 import logging
-
 from signalrcore.hub_connection_builder import HubConnectionBuilder
 
 
@@ -19,8 +19,10 @@ def init_hub_connection(server_url, on_upd_cb):
         .build()
     )
     hub_connection.on_open(
-        lambda: print("connection opened and handshake received ready to send messages")
+        lambda: logger.info(
+            "connection opened and handshake received ready to send messages"
+        )
     )
-    hub_connection.on_close(lambda: print("connection closed"))
+    hub_connection.on_close(lambda: logger.info("connection closed"))
     hub_connection.on("OnUpdate", on_upd_cb)
     return hub_connection
