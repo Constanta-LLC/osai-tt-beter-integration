@@ -1,29 +1,27 @@
-import sys
-from time import sleep
+import asyncio
 
-from coach_client import CoachClient
+from loguru import logger
+
+from coach_client import CoachClientAsync
 from config import (
-    beter_base_url,
-    beter_feed_channel,
-    beter_api_key,
-    beter_snapshot_batch_size,
     coach_url,
     system_kit_id,
     coach_auth_token,
 )
-from hub import init_hub_connection
 from score_updater import ScoreUpdater
+from ws_async_client import ws_loop
+
+
+async def main():
+    coach_cli = CoachClientAsync(coach_url, system_kit_id, coach_auth_token)
+    try:
+        await coach_cli.startup()
+        score_updater = ScoreUpdater(coach_cli)
+        await ws_loop(score_updater.on_upd)
+    finally:
+        await coach_cli.shutdown()
+
 
 if __name__ == "__main__":
-    beter_server_url = f"{beter_base_url}/{beter_feed_channel}?ApiKey={beter_api_key}&snapshotBatchSize={beter_snapshot_batch_size}"
-    coach_cli = CoachClient(coach_url, system_kit_id, coach_auth_token)
-    score_updater = ScoreUpdater(coach_cli)
-    hub_connection = init_hub_connection(beter_server_url, score_updater.on_upd)
-
-    try:
-        hub_connection.start()
-        while True:
-            sleep(1)
-    finally:
-        hub_connection.stop()
-        sys.exit(0)
+    logger.add("logs/service.log", rotation="1 day")
+    asyncio.run(main())

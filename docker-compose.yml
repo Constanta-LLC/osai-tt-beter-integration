@@ -5,3 +5,6 @@ services:
     build:
       context: .
     command: ["python", "run.py"]
+    volumes:
+    - ./logs/:/app/logs/
+    restart: always
