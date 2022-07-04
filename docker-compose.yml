@@ -8,3 +8,5 @@ services:
     volumes:
     - ./logs/:/app/logs/
     restart: always
+    environment:
+      - SYSTEM_KIT_ID
