@@ -10,9 +10,16 @@ class Score(pydantic.BaseModel):
         return self.player1, self.player2
 
 
+class Player(pydantic.BaseModel):
+    id: int
+    full_name_international: str
+
+
 class Match(pydantic.BaseModel):
     score: Score
     status: str
+    player1: Player
+    player2: Player
 
 
 class Set(pydantic.BaseModel):
@@ -21,6 +28,7 @@ class Set(pydantic.BaseModel):
     number: int
     active_player_id: int
     reverse_position: int
+    active_player_id: int
 
 
 class Data(pydantic.BaseModel):
